@@ -19,5 +19,4 @@ class User(Base):
     def __init__(self, username: str, email: str, password: str):
         self.username = username
         self.email = email
-        self.set_password(password)
         self._created_at = datetime.now()

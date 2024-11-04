@@ -13,6 +13,11 @@ class UserRepository:
         self.db_session.refresh(user_data)
         return user_data
 
+    def update_user(self, user_data: User) -> User:
+        """Update existing user in the db"""
+        self.db_session.commit()
+        return user_data
+
     def get_user_by_id(self, user_id: Uuid) -> User:
         return self.db_session.select(User).where(User.user_id == user_id)
 
