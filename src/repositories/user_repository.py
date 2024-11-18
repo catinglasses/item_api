@@ -18,8 +18,15 @@ class UserRepository:
         self.db_session.commit()
         return user_data
 
+    def _get_user(self, criteria) -> User:
+        """Private method to retrieve a user based on a given criteria"""
+        stmt = select(User).where(criteria)
+        result = self.db_session.execute(stmt).scalars().one_or_none()
+        if result is None:
+            raise NoResultFound("User not found")
+
     def get_user_by_id(self, user_id: Uuid) -> User:
-        return self.db_session.select(User).where(User.user_id == user_id)
+        return self._get_user(User.user_id == user_id)
 
     def get_user_by_username(self, username: str) -> User:
-        return self.db_session.select(User).where(User.username == username)
+        return self._get_user(User.username == username)

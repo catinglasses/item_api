@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from src.models.users import User
 from src.repositories.user_repository import UserRepository
-from src.schemas.users import UserCreate
+from src.schemas.users import UserCreate, UserLogin
 
 class UserService:
     '''User management class. User-related operations like create, authenticate and others go here'''
@@ -29,6 +29,7 @@ class UserService:
         """Set password after hashing it"""
         self._password_hash = self.hash_password(password)
 
+    @staticmethod
     def hash_password(self, password: str) -> str:
         """Hash password for storage"""
         return hashlib.sha256(password.encode()).hexdigest()
@@ -36,6 +37,13 @@ class UserService:
     def check_password(self, password: str, user: User) -> bool:
         """Check if provided password matches the hash"""
         return self.hash_password(password) == user.get_password_hash()
+
+    def authenticate_user(self, user_login: UserLogin) -> User | None:
+        """Authenticate a user using their username and password"""
+        user = self.user_repository.get_user_by_username(user_login.username)
+        if user and self.check_password:
+            return user
+        return None
 
     def get_created_at(self, user: User):
         """Return user creation timestamp"""

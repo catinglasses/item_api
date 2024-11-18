@@ -9,3 +9,8 @@ async_session_maker = sessionmaker(bind=engine, class_=AsyncSession, expire_on_c
 
 class Base(DeclarativeBase):
     pass
+
+async def get_db() -> AsyncSession:
+    """Generator func for creating db sessions."""
+    async with async_session_maker() as session:
+        yield session

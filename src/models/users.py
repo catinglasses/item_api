@@ -1,6 +1,9 @@
-from sqlalchemy import Column, Uuid, String, Integer, DateTime, Boolean
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
+from uuid import UUID
+from typing import Optional, Set
 from datetime import datetime
-import hashlib
 
 from src.models.database import Base
 
@@ -8,15 +11,11 @@ class User(Base):
     __tablename__="User"
 
     user_id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
-    username = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    _password_hash = Column(String, nullable=False)
-    _created_at = Column(DateTime, nullable=False)
-    _last_login = Column(DateTime)
-    is_active = Column(Boolean, default=True)
-    is_admin = Column(Boolean, default=False)
-
-    def __init__(self, username: str, email: str, password: str):
-        self.username = username
-        self.email = email
-        self._created_at = datetime.now()
+    username: Mapped[str] = mapped_column(unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    _password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    _created_at: Mapped[datetime] = mapped_column(nullable=False)
+    _last_login: Mapped[datetime] = mapped_column(nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_admin: Mapped[bool] = mapped_column(default=False)
+    items: Mapped[Set("Item")] = relationship(back_populates="creator")
