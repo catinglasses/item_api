@@ -8,8 +8,8 @@ from src.schemas.users import UserCreate, UserLogin
 
 class UserService:
     '''User management class. User-related operations like create, authenticate and others go here'''
-    def __init__(self, db_session: Session):
-        self.user_repository = UserRepository(db_session)
+    def __init__(self, user_repository: UserRepository):
+        self.user_repository = user_repository
 
     def create_user(self, user_create: UserCreate) -> User:
         """Create a new User via user_repository"""

@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 
 from src.models.items import Item
 from src.repositories.item_repository import ItemRepository
-#from src.schemas.items import 
+# from src.schemas.items import ItemCreate
 
 class ItemService:
     '''Item management class. Item-related operations like create, update and others go here'''
-    def __init__(self, db_session: Session):
-        self.item_repository = ItemRepository(db_session)
+    def __init__(self, item_repository: ItemRepository):
+        self.item_repository = item_repository
 
     def create_item(self, item_create: ItemCreate) -> Item:
         """Create a new Item via item_repository"""

@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from src.models.users import User
 from src.services.user_service import UserService
 
-SECRET_KEY = "Some_secret_key"
+SECRET_KEY = "b8a7aaf88a2cb2af28f593fea74eb295"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

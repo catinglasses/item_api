@@ -1,32 +1,15 @@
-from typing import Annotated
-
-from fastapi import Depends, FastAPI
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
+from fastapi import FastAPI
+from v1.api import app as api_router
 
 app = FastAPI()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+app.include_router(api_router)
 
+# Optional: You can define a root endpoint for testing
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to my FastAPI application!"}
 
-class User(BaseModel):
-    username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
-
-
-def fake_decode_token(token):
-    return User(
-        username=token + "fakedecoded", email="john@example.com", full_name="John Doe"
-    )
-
-
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    user = fake_decode_token(token)
-    return user
-
-
-@app.get("/users/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
-    return current_user
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
