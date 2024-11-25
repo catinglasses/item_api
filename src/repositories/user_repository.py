@@ -1,32 +1,44 @@
-from sqlalchemy import Uuid, select
-from sqlalchemy.orm import Session
+from sqlalchemy import select, delete
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import NoResultFound
+from uuid import UUID
 
 from src.models.users import User
 
 class UserRepository:
-    def __init__(self, db_session: Session):
+    def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    def create_user(self, user_data: User) -> User:
+    async def create_user(self, user_data: User) -> User:
+        """Create a new user in the database (commit to db session)"""
         self.db_session.add(user_data)
-        self.db_session.commit()
-        self.db_session.refresh(user_data)
+        await self.db_session.commit()
+        await self.db_session.refresh(user_data)
         return user_data
 
-    def update_user(self, user_data: User) -> User:
+    async def update_user(self, user_data: User) -> User:
         """Update existing user in the db"""
-        self.db_session.commit()
+        await self.db_session.commit()
         return user_data
 
-    def _get_user(self, criteria) -> User:
+    async def _get_user(self, criteria) -> User:
         """Private method to retrieve a user based on a given criteria"""
         stmt = select(User).where(criteria)
-        result = self.db_session.execute(stmt).scalars().one_or_none()
-        if result is None:
+        result = await self.db_session.execute(stmt)
+        user = result.scalars().one_or_none()
+        if user is None:
             raise NoResultFound("User not found")
+        return user
 
-    def get_user_by_id(self, user_id: Uuid) -> User:
-        return self._get_user(User.user_id == user_id)
+    async def get_user_by_id(self, user_id: UUID) -> User:
+        """"""
+        return await self._get_user(User.user_id == user_id)
 
-    def get_user_by_username(self, username: str) -> User:
-        return self._get_user(User.username == username)
+    async def get_user_by_username(self, username: str) -> User:
+        return await self._get_user(User.username == username)
+
+    async def delete_user(self, user_id: UUID) -> None:
+        """Delete a user by ID"""
+        user = await self.get_user_by_id(user_id)
+        await self.db_session.delete(user)
+        await self.db_session.commit()
