@@ -26,6 +26,13 @@ async def get_password_manager(
     """Create PasswordManager instance, dependency inject UserRepository"""
     return PasswordManager(user_repository)
 
+async def get_user_service(
+    user_repository: UserRepository = Depends(get_user_repository),
+    password_manager: PasswordManager = Depends(get_password_manager)
+) -> UserService:
+    """Create UserService instance, DI UserRepository, PasswordManager"""
+    return UserService(user_repository, password_manager)
+
 async def get_token_service(
     user_repository: UserRepository = Depends(get_user_repository)
 ) -> TokenService:
@@ -62,3 +69,31 @@ async def login(
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/user/create/", response_model=UserOut)
+async def register(
+    user_create: UserCreate,
+    user_service: UserService = Depends(get_user_service)
+):
+    """Endpoint to register a new user"""
+    return await user_service.create_user(user_create)
+
+@router.put("/users/{user_id}/update-password/")
+async def update_user_password(
+    user_id: UUID,
+    current_password: str,
+    new_password: str,
+    user_service: UserService = Depends(get_user_service)
+):
+    """Endpoint to update User's password"""
+    return await user_service.update_password(user_id, current_password, new_password)
+
+@router.get("/users/")
+async def get_all_users(user_service: UserService = Depends(get_user_service)):
+    """Endpoint to retrieve all User objects"""
+    return await user_service.get_all_users()
+
+@router.get("/user/{user_id}/", response_model=UserOut)
+async def get_user(user_id: UUID, user_service: UserService = Depends(get_user_service)):
+    """Endpoint to retrieve a specific User by ID"""
+    return await user_service.get_user_or_404(user_id)
