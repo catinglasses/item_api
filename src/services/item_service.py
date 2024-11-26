@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from fastapi.exceptions import HTTPException
 
 from src.models.items import Item
 from src.repositories.item_repository import ItemRepository
@@ -35,13 +36,13 @@ class ItemService:
         """Return last update timestamp"""
         return item._last_updated
 
-    async def update_last_login(self, item: Item) -> None:
+    async def update_last_login(self, item: Item) -> Item:
         """Update last update timestamp"""
         item._last_updated = datetime.now()
         await self.item_repository.update_item(item)
 
     async def get_item_or_404(self, item_id: UUID) -> Item:
-        """Get Item by ID or Exception 404 Not Found"""
+        """Get Item by ID or raise 404 Not Found"""
         item = await self.item_repository.get_item_by_id(item_id)
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")
@@ -52,13 +53,13 @@ class ItemService:
         return await self.item_repository.get_all_items()
 
     async def replace_item(self, item_id: UUID, item: Item) -> Item:
-        """Completely replace an existing Item by its ID"""
+        """Completely replace an existing Item by retrieving it with ID"""
         current_item = await self.get_item_or_404(item_id)
         item.item_id = current_item.item_id
         return await self.item_repository.update_item(item)
 
     async def update_item(self, item_id: UUID, updated_item: Item) -> Item:
-        """Partially change an existing Item by retrieving it with its ID"""
+        """Partially change an existing Item by retrieving it with ID"""
         current_item = await self.get_item_or_404(item_id)
         
         if updated_item.name is not None:
@@ -73,6 +74,7 @@ class ItemService:
         return await self.item_repository.update_item(current_item)
 
     async def delete_item(self, item_id: UUID) -> dict:
+        """Delete Item object by retrieving it with ID"""
         current_item = await self.get_item_or_404(item_id)
         await self.item_repository.delete_item(item_id)
         return {"detail": "Item deleted successfully"}

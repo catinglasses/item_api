@@ -66,6 +66,15 @@ class PasswordManager:
         """Check if provided password matches the hash"""
         return self.hash_password(password) == user._password_hash
 
+    async def update_password(self, user: User ,current_password: str, new_password: str) -> User:
+        """Update User's password after verifying the current password"""
+        if not self.check_password(current_password, user):
+            raise ValueError("Your password is incorrect.")
+
+        user._password_hash = self.set_password(new_password)
+        await self.user_repository.update_user(user)
+        return user
+
 class UserAuthenticationManager(TokenService, PasswordManager):
     """Handles user authentication and token generation."""
     def __init__(self, token_service: TokenService, password_manager: PasswordManager):

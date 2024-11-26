@@ -37,6 +37,11 @@ class UserRepository:
     async def get_user_by_username(self, username: str) -> User:
         return await self._get_user(User.username == username)
 
+    async def get_all_users(self) -> list[User]:
+        stmt = select(User)
+        result = await self.db_session.execute(stmt)
+        return result.scalars().all()
+
     async def delete_user(self, user_id: UUID) -> None:
         """Delete a user by ID"""
         user = await self.get_user_by_id(user_id)
