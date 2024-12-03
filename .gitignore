@@ -1,3 +1,5 @@
 venv
 .env
 todo.py
+.vscode
+__pycache__

@@ -49,7 +49,8 @@ async def get_authentication_manager(
 @router.post("/token")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    auth_manager: UserAuthenticationManager = Depends(get_authentication_manager)
+    auth_manager: UserAuthenticationManager = Depends(get_authentication_manager),
+    user_service: UserService = Depends(get_user_service),
 ):
     """Endpoint to log in users"""
     user_login = UserLogin(username=form_data.username, password=form_data.password)
@@ -62,6 +63,8 @@ async def login(
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    await user_service.update_last_login(user)
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth_manager.token_service.create_access_token(
@@ -97,3 +100,8 @@ async def get_all_users(user_service: UserService = Depends(get_user_service)):
 async def get_user(user_id: UUID, user_service: UserService = Depends(get_user_service)):
     """Endpoint to retrieve a specific User by ID"""
     return await user_service.get_user_or_404(user_id)
+
+@router.get("/user/{user_id}/delete/")
+async def delete_user(user_id: UUID, user_service: Depends(get_user_service)):
+    """Endpoint to delete User after retrieving it by its ID"""
+    return await user_service.delete_user(user_id)

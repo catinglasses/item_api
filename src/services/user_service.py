@@ -48,13 +48,13 @@ class UserService:
         return await self.user_repository.get_all_users()
 
     async def replace_user(self, user_id: UUID, user: User) -> User:
-        """Completely replace an existing Item by retrieving it with ID"""
+        """Completely replace an existing User by retrieving it with ID"""
         current_user = await self.get_user_or_404(user_id)
         user.user_id = current_user.user_id
         return await self.user_repository.update_user(user)
 
     async def update_user(self, user_id: UUID, updated_user: User, password: str) -> User:
-        """Partially change an existing Item by retrieving it with ID after password verification"""
+        """Partially change an existing User by retrieving it with ID after password verification"""
         current_user = await self.get_user_or_404(user_id)
 
         if not PasswordManager.check_password(password, current_user):

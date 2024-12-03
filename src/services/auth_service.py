@@ -57,7 +57,6 @@ class PasswordManager:
         """Set password after hashing it"""
         return self.hash_password(password)
 
-    @staticmethod
     def hash_password(self, password: str) -> str:
         """Hash password for storage"""
         return hashlib.sha256(password.encode()).hexdigest()
