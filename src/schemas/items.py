@@ -13,6 +13,12 @@ class ItemSchema(BaseModel):
     amount: int = Query(None, ge=0, le=9999)
     _created_by: UUID
 
+class ItemCreate(BaseModel):
+    name: str
+    description: str | None = None
+    amount: int | None = 0
+    is_available: bool | None = False
+
 class ItemPatchSchema(ItemSchema):
     item_id: int | None = None
     name: str | None = None

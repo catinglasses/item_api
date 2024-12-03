@@ -2,26 +2,24 @@ from datetime import date, datetime
 from fastapi.exceptions import HTTPException
 
 from src.models.items import Item
-from src.repositories.item_repository import ItemRepository
 from src.schemas.items import ItemCreate
-from src.services.auth_service import UserAuthenticationManager
+from src.dependencies import get_current_user
+from src.repositories.item_repository import ItemRepository
 
 class ItemService:
     '''Item management class. Item-related operations like create, update and others go here'''
-    def __init__(self, item_repository: ItemRepository, user_auth_manager: UserAuthenticationManager):
+    def __init__(self, item_repository: ItemRepository):
         self.item_repository = item_repository
-        self.user_auth_manager = user_auth_manager
 
-    async def create_item(self, item_create: ItemCreate, token: str) -> Item:
+    async def create_item(self, item_create: ItemCreate, creator_id: UUID) -> Item:
         """Create a new Item via item_repository"""
-        creator = await self.user_auth_manager.get_current_user(token)
 
         new_item = Item(
             name=item_create.name,
             description=item_create.description,
             amount=item_create.amount,
             is_available=item_create.is_available,
-            _created_by = creator.user_id,
+            _created_by = creator_id,
             _created_at=datetime.now(),
             _last_updated=datetime.now()
         )
@@ -36,10 +34,11 @@ class ItemService:
         """Return last update timestamp"""
         return item._last_updated
 
-    async def update_last_login(self, item: Item) -> Item:
-        """Update last update timestamp"""
-        item._last_updated = datetime.now()
-        await self.item_repository.update_item(item)
+# DEPRECATED since it's easier to manually set new value when actually updating items
+    # async def update_last_updated(self, item: Item) -> Item:
+    #     """Update last update timestamp"""
+    #     item._last_updated = datetime.now()
+    #     await self.item_repository.update_item(item)
 
     async def get_item_or_404(self, item_id: UUID) -> Item:
         """Get Item by ID or raise 404 Not Found"""
@@ -56,6 +55,7 @@ class ItemService:
         """Completely replace an existing Item by retrieving it with ID"""
         current_item = await self.get_item_or_404(item_id)
         item.item_id = current_item.item_id
+        item._last_updated = datetime.now().isoformat()
         return await self.item_repository.update_item(item)
 
     async def update_item(self, item_id: UUID, updated_item: Item) -> Item:
@@ -70,6 +70,7 @@ class ItemService:
             current_item.amount = updated_item.amount
         if updated_item.is_available is not None:
             current_item.is_available = updated_item.is_available
+        current_item._last_updated = datetime.now().isoformat()
 
         return await self.item_repository.update_item(current_item)
 

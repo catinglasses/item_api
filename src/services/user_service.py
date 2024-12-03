@@ -30,11 +30,11 @@ class UserService:
     async def get_last_login(self, user: User) -> datetime:
         """Return last login timestamp"""
         return user._last_login
-
-    async def update_last_login(self, user: User) -> User:
-        """Update last login timestamp"""
-        user._last_login = datetime.now()
-        await self.user_repository.update_user(user)
+# DEPRECATED since it's easier to manually set new value when actually updating items
+    # async def update_last_login(self, user: User) -> User:
+    #     """Update last login timestamp"""
+    #     user._last_login = datetime.now()
+    #     await self.user_repository.update_user(user)
 
     async def get_user_or_404(self, user_id: UUID) -> User:
         """Get User by ID or raise 404 Not Found"""

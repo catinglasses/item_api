@@ -84,6 +84,7 @@ class UserAuthenticationManager(TokenService, PasswordManager):
         """Authenticate a user using their username and password."""
         user = await self.user_repository.get_user_by_username(user_login.username)
         if user and await self.password_manager.check_password(user_login.password, user):
+            user._last_login = datetime.now().isoformat()
             return user
         return None
 

@@ -8,7 +8,7 @@ from datetime import datetime
 from src.models.database import Base
 
 class User(Base):
-    __tablename__="User"
+    __tablename__="users"
 
     user_id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
