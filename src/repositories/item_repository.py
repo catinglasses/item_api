@@ -13,7 +13,7 @@ class ItemRepository:
         """Create a new Item in the database (commit to db session)"""
         self.db_session.add(item_data)
         await self.db_session.commit()
-        await self.db_session.refresh(_data)
+        await self.db_session.refresh(item_data)
         return item_data
 
     async def update_item(self, item_data: Item) -> Item:

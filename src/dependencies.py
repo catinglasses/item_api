@@ -1,6 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.models.users import User
 from src.models.database import get_db
 from src.services.user_service import UserService
 from src.services.item_service import ItemService
@@ -48,11 +49,10 @@ async def get_authentication_manager(
     return UserAuthenticationManager(token_service, password_manager)
 
 async def get_item_service(
-    item_repository: ItemRepository = Depends(get_item_repository),
-    user_auth_manager: UserAuthenticationManager = Depends(get_authentication_manager)
+    item_repository: ItemRepository = Depends(get_item_repository)
 ) -> ItemService:
     """Create ItemService instance, DI ItemRepository and UserAuthenticationManager"""
-    return ItemService(item_repository, user_auth_manager)
+    return ItemService(item_repository)
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),

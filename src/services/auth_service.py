@@ -5,22 +5,22 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
 from src.models.users import User
+from src.schemas.users import UserLogin
 from src.repositories.user_repository import UserRepository
-from src.services.user_service import UserService
 
 SECRET_KEY = "b8a7aaf88a2cb2af28f593fea74eb295"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/token")
 
 class TokenService:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
-    def create_access_token(self, data: dict, expires_detla: timedelta | None = None) -> str:
+    def create_access_token(self, data: dict, expires_delta: timedelta | None = None) -> str:
         to_encode = data.copy()
-        if expires_detla:
+        if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
             expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -82,9 +82,10 @@ class UserAuthenticationManager(TokenService, PasswordManager):
 
     async def authenticate_user(self, user_login: UserLogin) -> User | None:
         """Authenticate a user using their username and password."""
-        user = await self.user_repository.get_user_by_username(user_login.username)
+        user = await self.token_service.user_repository.get_user_by_username(user_login.username)
         if user and await self.password_manager.check_password(user_login.password, user):
-            user._last_login = datetime.now().isoformat()
+            user._last_login = datetime.now()
+            await self.token_service.user_repository.update_user(user)
             return user
         return None
 

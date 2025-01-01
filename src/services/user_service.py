@@ -1,4 +1,5 @@
 import hashlib
+from uuid import UUID
 from datetime import datetime
 from fastapi.exceptions import HTTPException
 
@@ -30,6 +31,7 @@ class UserService:
     async def get_last_login(self, user: User) -> datetime:
         """Return last login timestamp"""
         return user._last_login
+
 # DEPRECATED since it's easier to manually set new value when actually updating items
     # async def update_last_login(self, user: User) -> User:
     #     """Update last login timestamp"""
@@ -74,6 +76,5 @@ class UserService:
 
     async def delete_user(self, user_id: UUID) -> dict:
         """Delete User object by retrieving it with ID"""
-        current_user = await self.get_user_or_404(user_id)
-        await self.user_repository.delete_user(current_user)
+        await self.user_repository.delete_user(user_id)
         return {"detail": "User deleted successfully"}
